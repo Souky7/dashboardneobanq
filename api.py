@@ -1,20 +1,14 @@
-from flask import Flask, request, jsonify
+from fastapi import FastAPI, Request
 import joblib
+import pandas as pd
 
-app = Flask(__name__)
+app = FastAPI()
 
-# Charger le modèle (quand tu l'auras)
-# model = joblib.load("eligibility_model.joblib")
+model = joblib.load("eligibility_model.joblib")
 
-@app.route("/predict", methods=["POST"])
-def predict():
-    data = request.get_json()
-
-    # Simulation du modèle pour l'instant
-    # prediction = model.predict([data["features"]])[0]
-    prediction = 1 if data["income"] > 100000 else 0
-
-    return jsonify({"score": prediction})
-
-if __name__ == "__main__":
-    app.run(debug=True)
+@app.post("/predict")
+async def predict(data: dict):
+    df = pd.DataFrame([data])
+    prediction = model.predict(df)
+    score = prediction[0]
+    return {"score": float(score)}
