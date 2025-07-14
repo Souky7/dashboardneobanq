@@ -10,7 +10,7 @@ expected_features = model.feature_names_in_
 # Création de l'API FastAPI
 app = FastAPI(title="API Score Éligibilité", description="Renvoie le score d’éligibilité d’un client")
 
-# Exemple simplifié de structure d’entrée (tu peux en ajouter selon besoin)
+# Structure d’entrée simplifiée
 class ClientData(BaseModel):
     AMT_INCOME_TOTAL: float = 0
     AMT_CREDIT: float = 0
@@ -35,15 +35,16 @@ class ClientData(BaseModel):
 @app.post("/predict")
 def predict(data: ClientData):
     try:
-        # Convertir les données reçues en DataFrame
-        df = pd.DataFrame([data.dict()])
+        # Convertir en DataFrame utilisateur
+        df_input = pd.DataFrame([data.dict()])
 
-        # Créer un DataFrame avec les colonnes attendues, remplir les absentes avec 0 ou NaN
-        df_full = pd.DataFrame(columns=expected_features)
-        df_full = df_full.append(df, ignore_index=True)
-        df_full = df_full.fillna(0)  # ou choisir une autre stratégie si nécessaire
+        # Créer un DataFrame vide avec les colonnes attendues
+        df_template = pd.DataFrame(columns=expected_features)
 
-        # S'assurer que les colonnes sont dans le bon ordre
+        # Concaténer les deux (équivalent du append)
+        df_full = pd.concat([df_template, df_input], ignore_index=True).fillna(0)
+
+        # Réorganiser dans l’ordre attendu
         df_full = df_full[expected_features]
 
         # Prédiction
